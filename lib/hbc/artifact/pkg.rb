@@ -5,10 +5,10 @@ class Hbc::Artifact::Pkg < Hbc::Artifact::Base
 
   def load_pkg_description(pkg_description)
     @pkg_relative_path = pkg_description.shift
-    @pkg_install_opts = pkg_description.shift
+    @pkg_install_opts = pkg_description.shift  
     begin
-      if @pkg_install_opts.respond_to?(:keys)
-        @pkg_install_opts.assert_valid_keys( :allow_untrusted )
+      if @pkg_install_opts.respond_to?(:keys) 
+        @pkg_install_opts.assert_valid_keys( :allow_untrusted , :apply_choice_changes )
       elsif @pkg_install_opts
         raise
       end
@@ -48,6 +48,13 @@ class Hbc::Artifact::Pkg < Hbc::Artifact::Base
     ]
     args << '-verboseR' if Hbc.verbose
     args << '-allowUntrusted' if pkg_install_opts :allow_untrusted
+    if pkg_install_opts :apply_choice_changes
+      plist = @cask.staged_path.join(pkg_install_opts(:apply_choice_changes))
+      unless plist.exist?
+        raise Hbc::CaskError.new "plist choice file not found: '#{plist}'"
+      end
+      args << '-applyChoiceChangesXML' << plist if pkg_install_opts :apply_choice_changes
+    end
     @command.run!('/usr/sbin/installer', {:sudo => true, :args => args, :print_stdout => true})
   end
 end
