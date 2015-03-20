@@ -7,8 +7,7 @@ cask :v1 => 'osxfuse' do
   homepage 'https://osxfuse.github.io/'
   license :bsd
 
-  #option "with-macfuse", "Installs MacFUSE compatibility layer."  
-
+  # adds MacFuse compatibility layer by default
   plist = <<-EOT.undent
   <?xml version="1.0" encoding="UTF-8"?>
   <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -25,16 +24,16 @@ cask :v1 => 'osxfuse' do
   </array>
   </plist>
   EOT
-  
+
   plist_file = 'options.plist'
-  
+
   preflight do
     plist_path = staged_path.join(plist_file)
-    IO.binwrite(plist_path, plist)    
+    IO.binwrite(plist_path, plist)
   end
- 
+
   pkg "Install OSXFUSE #{version[0..-3]}.pkg", :apply_choice_changes => plist_file
-  
+
   uninstall :pkgutil => 'com.github.osxfuse.pkg.Core|com.github.osxfuse.pkg.PrefPane|com.github.osxfuse.pkg.MacFUSE',
             :kext => 'com.github.osxfuse.filesystems.osxfusefs'
 end
